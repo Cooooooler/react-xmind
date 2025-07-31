@@ -50,7 +50,6 @@ const MindMapList: React.FC<MindMapListProps> = ({
     try {
       setLoading(true);
       const response = await getMindMapList({ title });
-      console.log(response, 'response');
       setMindMaps(response.list);
     } catch (error) {
       console.error('获取思维导图列表出错:', error);
