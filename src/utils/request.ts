@@ -1,5 +1,6 @@
 import { extend } from 'umi-request';
 import { message } from 'antd';
+import { logApiError } from '@/config/logger';
 
 // 与后端约定的响应数据格式
 export interface ResponseStructure {
@@ -18,14 +19,16 @@ const request = extend({
   errorHandler: (error: any) => {
     if (error.response) {
       // 请求已发送但服务端返回状态码非2xx的响应
-      console.log(error.response.status);
-      console.log(error.response.headers);
-      console.log(error.data);
-      console.log(error.request);
+      logApiError('HTTP请求', {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: error.data,
+        request: error.request,
+      });
       message.error(`请求错误 ${error.response.status}: ${error.data.message}`);
     } else {
       // 请求初始化时出错或者没有响应返回的异常
-      console.log(error.message);
+      logApiError('网络请求', error);
       message.error('网络异常，请稍后重试');
     }
     throw error; // 如果throw. 错误将继续抛出.

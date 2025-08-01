@@ -13,6 +13,7 @@ import { createStyles } from 'antd-style';
 import { SearchOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import type { MindMap } from '@/services/mindmap';
 import { getMindMapList, deleteMindMap } from '@/services/mindmap';
+import { logApiError } from '@/config/logger';
 
 const { Search } = Input;
 
@@ -61,6 +62,7 @@ const MindMapList: React.FC<MindMapListProps> = ({
   const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [mindMaps, setMindMaps] = useState<MindMap[]>([]);
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const fetchMindMaps = async (title?: string) => {
     try {
@@ -68,7 +70,7 @@ const MindMapList: React.FC<MindMapListProps> = ({
       const response = await getMindMapList({ title });
       setMindMaps(response.list);
     } catch (error) {
-      console.error('获取思维导图列表出错:', error);
+      logApiError('获取思维导图列表', error);
       message.error('获取思维导图列表失败，请稍后重试');
     } finally {
       setLoading(false);
@@ -93,14 +95,21 @@ const MindMapList: React.FC<MindMapListProps> = ({
 
   const handleDelete = async (mindMap: MindMap, e: React.MouseEvent) => {
     e.stopPropagation();
+    setDeletingIds((prev) => new Set(prev).add(mindMap.id));
     try {
       await deleteMindMap(mindMap.id);
       message.success('删除成功');
       // 重新获取列表
       fetchMindMaps(searchValue);
     } catch (error) {
-      console.error('删除思维导图时出错:', error);
+      logApiError('删除思维导图', error);
       message.error('删除失败，请稍后重试');
+    } finally {
+      setDeletingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(mindMap.id);
+        return newSet;
+      });
     }
   };
 
@@ -122,7 +131,7 @@ const MindMapList: React.FC<MindMapListProps> = ({
         onSearch={handleSearch}
       />
       <Spin spinning={loading}>
-        {mindMaps.length > 0 ? (
+        {mindMaps?.length > 0 ? (
           <List
             dataSource={mindMaps}
             renderItem={(item) => (
@@ -157,6 +166,7 @@ const MindMapList: React.FC<MindMapListProps> = ({
                       danger
                       size="small"
                       icon={<DeleteOutlined />}
+                      loading={deletingIds.has(item.id)}
                       className={styles.actionButton}
                     >
                       删除
