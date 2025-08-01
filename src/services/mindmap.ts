@@ -1,4 +1,4 @@
-import { post, get } from '@/utils/request';
+import { post, get, del } from '@/utils/request';
 import type { MindElixirData } from 'mind-elixir';
 
 export interface MindMap {
@@ -29,4 +29,8 @@ export async function createMindMap(params: CreateMindMapParams) {
 
 export async function getMindMapList(params?: { title?: string }) {
   return get<GetMindMapListResult>('/mindmap/list', params);
+}
+
+export async function deleteMindMap(id: string) {
+  return del<{ success: boolean }>('/mindmap/delete', { id });
 }

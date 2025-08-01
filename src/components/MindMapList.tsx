@@ -1,9 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, List, Input, Empty, Spin, message } from 'antd';
+import {
+  Drawer,
+  List,
+  Input,
+  Empty,
+  Spin,
+  message,
+  Button,
+  Popconfirm,
+} from 'antd';
 import { createStyles } from 'antd-style';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 import type { MindMap } from '@/services/mindmap';
-import { getMindMapList } from '@/services/mindmap';
+import { getMindMapList, deleteMindMap } from '@/services/mindmap';
 
 const { Search } = Input;
 
@@ -12,7 +21,6 @@ const useStyles = createStyles(({ token }) => ({
     marginBottom: token.marginLG,
   },
   listItem: {
-    cursor: 'pointer',
     transition: 'all 0.3s',
     '&:hover': {
       backgroundColor: token.colorBgTextHover,
@@ -27,6 +35,14 @@ const useStyles = createStyles(({ token }) => ({
   time: {
     color: token.colorTextSecondary,
     fontSize: token.fontSizeSM,
+  },
+  actions: {
+    display: 'flex',
+    gap: token.marginXS,
+  },
+  actionButton: {
+    padding: '4px 8px',
+    height: 'auto',
   },
 }));
 
@@ -75,6 +91,19 @@ const MindMapList: React.FC<MindMapListProps> = ({
     onClose();
   };
 
+  const handleDelete = async (mindMap: MindMap, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteMindMap(mindMap.id);
+      message.success('删除成功');
+      // 重新获取列表
+      fetchMindMaps(searchValue);
+    } catch (error) {
+      console.error('删除思维导图时出错:', error);
+      message.error('删除失败，请稍后重试');
+    }
+  };
+
   return (
     <Drawer
       title="选择思维导图"
@@ -97,10 +126,7 @@ const MindMapList: React.FC<MindMapListProps> = ({
           <List
             dataSource={mindMaps}
             renderItem={(item) => (
-              <List.Item
-                className={styles.listItem}
-                onClick={() => handleSelect(item)}
-              >
+              <List.Item className={styles.listItem}>
                 <List.Item.Meta
                   title={<div className={styles.title}>{item.title}</div>}
                   description={
@@ -109,6 +135,34 @@ const MindMapList: React.FC<MindMapListProps> = ({
                     </div>
                   }
                 />
+                <div className={styles.actions}>
+                  <Button
+                    type="primary"
+                    size="small"
+                    icon={<EyeOutlined />}
+                    className={styles.actionButton}
+                    onClick={() => handleSelect(item)}
+                  >
+                    查看
+                  </Button>
+                  <Popconfirm
+                    title="确定要删除这个思维导图吗？"
+                    description="删除后将无法恢复"
+                    onConfirm={(e) => handleDelete(item, e as any)}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button
+                      type="primary"
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      className={styles.actionButton}
+                    >
+                      删除
+                    </Button>
+                  </Popconfirm>
+                </div>
               </List.Item>
             )}
           />

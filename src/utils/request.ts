@@ -70,8 +70,8 @@ export const put = <T = any>(url: string, data?: object) => {
   return request<T>(url, { method: 'PUT', data });
 };
 
-export const del = <T = any>(url: string) => {
-  return request<T>(url, { method: 'DELETE' });
+export const del = <T = any>(url: string, data?: object) => {
+  return request<T>(url, { method: 'DELETE', data });
 };
 
 export default request;
