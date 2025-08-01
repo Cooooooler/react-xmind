@@ -7,7 +7,7 @@ import {
   CopyOutlined,
 } from '@ant-design/icons';
 import MindElixir from 'mind-elixir';
-import type { MindElixirData, MindElixirInstance } from 'mind-elixir';
+import type { MindElixirData, MindElixirInstance, Options } from 'mind-elixir';
 import { createStyles } from 'antd-style';
 import { createMindMap, updateMindMap } from './services/mindmap';
 import MindMapList from './components/MindMapList';
@@ -73,14 +73,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (mindMapRef.current && !mindMap) {
-      const options = {
+      const options: Options = {
+        locale: 'zh_CN',
         el: mindMapRef.current,
         direction: MindElixir.LEFT,
-        data: defaultData,
         draggable: true,
+        editable: true,
         contextMenu: true,
         toolBar: true,
-        nodeMenu: true,
       };
 
       const instance = new MindElixir(options);
