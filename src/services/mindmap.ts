@@ -24,18 +24,9 @@ export interface GetMindMapListResult {
 }
 
 export async function createMindMap(params: CreateMindMapParams) {
-  // 将data转换为json字符串
-  const data = JSON.stringify(params.data);
-  return post<CreateMindMapResult>('/mindmap/create', {
-    ...params,
-    data,
-  });
+  return post<CreateMindMapResult>('/mindmap/create', params);
 }
 
 export async function getMindMapList(params?: { title?: string }) {
-  const res = await get<GetMindMapListResult>('/mindmap/list', params);
-  res.list.forEach((element) => {
-    element.data = JSON.parse(element.data as unknown as string);
-  });
-  return res;
+  return get<GetMindMapListResult>('/mindmap/list', params);
 }

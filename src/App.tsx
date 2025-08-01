@@ -80,11 +80,10 @@ const App: React.FC = () => {
     if (mindMap) {
       try {
         const data = mindMap.getData();
-        const response = await createMindMap({
+        await createMindMap({
           data,
           title: data.nodeData.topic,
         });
-
         messageApi.success('思维导图保存成功');
       } catch (error) {
         console.error('保存思维导图时出错:', error);
